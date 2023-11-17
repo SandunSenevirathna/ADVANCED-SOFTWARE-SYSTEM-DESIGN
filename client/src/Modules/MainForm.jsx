@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Avatar, Box, Button, Paper, TextField } from '@mui/material';
 import Person2Icon from '@mui/icons-material/Person2';
 import axios from 'axios';
@@ -7,33 +7,52 @@ const MainForm = () => {
     const [isAvailable, setIsAvailable] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const usernameInputRef = useRef(null);
+    const passwordInputRef = useRef(null);
 
     useEffect(() => {
-        // Fetch UserData from the backend when the component mounts
+        showAlert();
+    }, []);
+
+    useEffect(() => {
+
         fetchUserData();
+        usernameInputRef.current.focus();
     }, [username]);
 
 
+    const showAlert = () => {
+        alert(`
+            This ReactJS application, designed for advanced software system design assignments, 
+            focuses on streamlining user management through a RESTful CRUD API. The application 
+            prioritizes functionality over security considerations and outputs certain results to 
+            the browser console. This lightweight application serves as a practical tool for understanding 
+            and implementing fundamental principles of system design, particularly in the context of software 
+            development assignments.
+
+            --- Sandun Senevirathna ( ITT-1819-079 | 1036 ) ---
+        `);
+    };
 
     const fetchUserData = async () => {
         try {
             const response = await axios.get('http://localhost:8085/getUserData');
             const userData = response.data;
 
-            // Check if the entered username is in UserData
+
             const isUserAvailable = userData.some((user) => user.username === username);
 
             setIsAvailable(isUserAvailable);
 
-            // If the user is available, set the password field
             if (isUserAvailable) {
                 const user = userData.find((user) => user.username === username);
-                setPassword(user.password || ''); // Ensure to handle the case where password is null or undefined
+                setPassword(user.password || '');
+                passwordInputRef.current.focus();
 
                 console.log('Username : ', username);
                 console.log('Password : ', user.password);
             } else {
-                // Clear the password field if the user is not available
+
                 setPassword('');
             }
         } catch (error) {
@@ -44,11 +63,13 @@ const MainForm = () => {
 
     const handleInsert = async () => {
         try {
-            // Send a POST request to the backend endpoint with the user data
+
             const response = await axios.post('http://localhost:8085/insertUserData', {
                 username,
                 password,
             });
+            console.log('User Data Insert Successfully');
+
             handleClear();
 
         } catch (error) {
@@ -59,13 +80,13 @@ const MainForm = () => {
 
     const handleUpdate = async () => {
         try {
-            // Send a PUT request to the backend endpoint with the updated user data
+
             const response = await axios.put(`http://localhost:8085/updateUserData/${username}`, {
                 username,
                 password,
             });
 
-            // Check if the update was successful
+
             if (response.status === 200) {
                 console.log('User Data Updated Successfully');
 
@@ -83,7 +104,7 @@ const MainForm = () => {
 
     const handleDelete = async () => {
         try {
-            // Send a DELETE request to the backend endpoint with the username
+
             await axios.delete(`http://localhost:8085/deleteUserData/${username}`);
             console.log(`${username} User Data Deleted Successfully`);
 
@@ -108,6 +129,7 @@ const MainForm = () => {
         setUsername('');
         setPassword('');
         setIsAvailable(false);
+        usernameInputRef.current.focus();
     }
 
     return (
@@ -131,23 +153,24 @@ const MainForm = () => {
                     </Box>
                     <Box mt={2}>
                         <TextField
-                            id="outlined-basic"
                             label="Username"
                             variant="outlined"
                             value={username}
                             onChange={handleUsernameChange}
+                            inputRef={usernameInputRef}
                         />
                     </Box>
                     <Box mt={1}>
                         <TextField
-                            id="outlined-basic"
                             label="Password"
                             variant="outlined"
                             type="password"
                             value={password}
                             onChange={handlePasswordChange}
+                            inputRef={passwordInputRef}
                         />
                     </Box>
+
                     <Box display={'flex'} flexDirection={'row'} mt={2} mb={3}>
                         {isAvailable ? (
                             <>
